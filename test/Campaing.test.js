@@ -46,4 +46,27 @@ describe('Campaings Test', () => {
         assert.ok(isApproverAccount1);
         assert.ok(isApproverAccount2);
     });
+
+    it('should require a minium contribuition', async() => {
+        try {
+            await campaing.methods.contribute().send({from: accounts[1], value: '99'});
+            assert.fail('Falhou');
+        } catch (error) {
+            assert.notEqual(error.message, 'Falhou');
+            assert(error);
+        }
+    });
+
+    it('should allow the manager to make a payment request', async () => {
+        await campaing.methods.createRequest(
+            'Buy batteries',
+            '100',
+            accounts[1]
+        )
+        .send({from: accounts[0], gas: '1000000'});
+        const request = await campaing.methods.requests(0).call();
+        assert.equal('Buy batteries', request.description);
+        assert.equal('100', request.value);
+        assert.equal(accounts[1], request.recipient);
+    });
 })
