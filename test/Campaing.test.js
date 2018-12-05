@@ -69,4 +69,39 @@ describe('Campaings Test', () => {
         assert.equal('100', request.value);
         assert.equal(accounts[1], request.recipient);
     });
+
+    it('should process a request', async () => {
+        await campaing.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')});
+        await campaing.methods.createRequest(
+            'Buy batteries',
+            web3.utils.toWei('5', 'ether'),
+            accounts[1]
+        ).send({from: accounts[0], gas: '1000000'});
+
+        await campaing.methods.approveRequest(0).send({from: accounts[0], gas: '1000000'});
+        await campaing.methods.finalizeRequest(0).send({from: accounts[0], gas: '1000000'});
+
+        let balance = await web3.eth.getBalance(accounts[1]);
+        balance = web3.utils.fromWei(balance, 'ether');
+        balance = parseFloat(balance);
+        assert(balance > 104);
+    });
+
+    it('should\'t process a request not send by the manager', async () => {
+        await campaing.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')});
+        await campaing.methods.createRequest(
+            'Buy batteries',
+            web3.utils.toWei('5', 'ether'),
+            accounts[1]
+        ).send({from: accounts[0], gas: '1000000'});
+
+        await campaing.methods.approveRequest(0).send({from: accounts[0], gas: '1000000'});
+        try {
+            await campaing.methods.finalizeRequest(0).send({from: accounts[1], gas: '1000000'});
+            assert.fail('Falhou');
+        } catch (error) {
+            assert.notEqual(error.message, 'Falhou');
+            assert(error);
+        }
+    });
 })
