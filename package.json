@@ -4,15 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "compile": "node ethereum/compile.js",
+    "deploy": "node ethereum/deploy.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^6.2.0",
     "fs-extra": "^7.0.1",
     "ganache-cli": "^6.2.1",
     "mocha": "^5.2.0",
     "solc": "^0.4.25",
+    "truffle-hdwallet-provider": "0.0.3",
     "web3": "^1.0.0-beta.36"
   }
 }

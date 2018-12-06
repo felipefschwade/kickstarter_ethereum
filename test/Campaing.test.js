@@ -104,4 +104,46 @@ describe('Campaings Test', () => {
             assert(error);
         }
     });
+
+    it('should allow only the manager to create a request', async () => {
+        await campaing.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')});
+        try {
+            await campaing.methods.createRequest(
+                'Buy batteries',
+                web3.utils.toWei('5', 'ether'),
+                accounts[1]
+            ).send({from: accounts[1], gas: '1000000'});
+            assert.fail('Falhou');
+        } catch (error) {
+            assert.notEqual(error.message, 'Falhou');
+            assert(error);
+        }
+    });
+
+    it('should\'t allow to finalize a request not approved.', async () => {
+        await campaing.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')});
+        await campaing.methods.createRequest(
+            'Buy batteries',
+            web3.utils.toWei('5', 'ether'),
+            accounts[1]
+        ).send({from: accounts[0], gas: '1000000'});
+        try {
+            await campaing.methods.finalizeRequest(0).send({from: accounts[1], gas: '1000000'});
+            assert.fail('Falhou');
+        } catch (error) {
+            assert.notEqual(error.message, 'Falhou');
+            assert(error);
+        }
+    });
+
+    it('should\'t approve a inexistent request', async () => {
+        await campaing.methods.contribute().send({from: accounts[0], value: web3.utils.toWei('10', 'ether')});
+        try {
+            await campaing.methods.approveRequest(0).send({from: accounts[0], gas: '1000000'});
+            assert.fail('Falhou');
+        } catch (error) {
+            assert.notEqual(error.message, 'Falhou');
+            assert(error);
+        }
+    });
 })
